@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EPUB Counter</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        #result {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background: #f6f6f6;
+            padding: 10px;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>EPUB Counter</h2>
+
+<input type="file" id="fileInput" multiple accept=".epub">
+<br>
+<button onclick="upload()">upload</button>
+
+<div id="result"></div>
+
+<script>
+    async function upload() {
+        const input = document.getElementById("fileInput");
+        const resultDiv = document.getElementById("result");
+
+        if (input.files.length === 0) {
+            resultDiv.textContent = "files could not be empty";
+            return;
+        }
+
+        const formData = new FormData();
+        for (const file of input.files) {
+            formData.append("file", file);
+        }
+
+        resultDiv.textContent = "uploading...";
+
+        try {
+            const resp = await fetch("http://localhost:13824", {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await resp.json();
+
+            if (!resp.ok) {
+                resultDiv.textContent = "error：\n" + JSON.stringify(data.error, null, 2);
+                return;
+            }
+
+            let output = "";
+            for (const item of data.results) {
+                output += `${item.filename} : ${item.characters}\n`;
+            }
+
+            resultDiv.textContent = output;
+
+        } catch (err) {
+            resultDiv.textContent = "request failed:" + err;
+        }
+    }
+</script>
+
+</body>
+</html>

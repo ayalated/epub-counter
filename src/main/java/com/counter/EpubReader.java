@@ -7,9 +7,12 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,9 +22,11 @@ import java.util.zip.ZipFile;
 
 public class EpubReader {
     private final Path epubPath;
+    private final boolean isTemp;
 
-    public EpubReader(Path epubPath) {
+    public EpubReader(Path epubPath, boolean isTemp) {
         this.epubPath = epubPath;
+        this.isTemp = isTemp;
     }
 
     public CountResult count(boolean byChapter) throws Exception {
@@ -80,8 +85,18 @@ public class EpubReader {
                 result.add(count);
             }
             return result;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } finally {
+            if (isTemp) {
+                Files.deleteIfExists(epubPath);
+            }
         }
+    }
+
+
+    public static EpubReader fromUpload(InputStream is) throws IOException {
+        Path tempFile = Files.createTempFile("upload-", ".epub");
+        Files.copy(is, tempFile, StandardCopyOption.REPLACE_EXISTING);
+
+        return new EpubReader(tempFile, true);
     }
 }
