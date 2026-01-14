@@ -1,4 +1,4 @@
-package com.counter;
+package com.counter.epub;
 
 import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
@@ -29,7 +29,7 @@ public class EpubReader {
         this.isTemp = isTemp;
     }
 
-    public CountResult count(boolean byChapter) throws Exception {
+    public CountResult count() throws Exception {
         CountResult result = new CountResult();
         try (ZipFile zipFile = new ZipFile(epubPath.toFile(), StandardCharsets.UTF_8)) {
             ZipEntry containerEntry = zipFile.getEntry("META-INF/container.xml");

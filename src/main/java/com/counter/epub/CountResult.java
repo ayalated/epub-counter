@@ -1,4 +1,4 @@
-package com.counter;
+package com.counter.epub;
 
 public class CountResult {
 
