@@ -7,32 +7,18 @@ import io.javalin.http.UploadedFile;
 import org.eclipse.jetty.http.HttpStatus;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class CountController {
     public static void count(Context ctx) {
-        List<UploadedFile> files = ctx.uploadedFiles("file");
-        if (files.isEmpty()) {
+        UploadedFile file = ctx.uploadedFile("file");
+
+        if (file == null) {
             ctx.status(HttpStatus.BAD_REQUEST_400).json(Map.of("error", "no files uploaded"));
             return;
         }
 
-        List<Map<String, Object>> results = new ArrayList<>();
 
-        for (UploadedFile file : files) {
-            handleOneFile(file, results, ctx);
-        }
-
-        ctx.json(Map.of(
-                "totalFiles", results.size(),
-                "results", results
-        ));
-    }
-
-
-    private static void handleOneFile(UploadedFile file, List<Map<String, Object>> results, Context ctx) {
         String name = file.filename();
 
         if (!name.toLowerCase().endsWith(".epub")) {
@@ -41,8 +27,8 @@ public class CountController {
         }
 
         try (InputStream is = file.content()) {
-            CountResult result = EpubReader.fromUpload(is).count();
-            results.add(Map.of("filename", name, "characters", result.getTotal()));
+            CountResult r = EpubReader.fromUpload(is).count();
+            ctx.status(HttpStatus.OK_200).json(Map.of("filename", name, "characters", r.getTotal()));
         } catch (Exception e) {
             ctx.status(HttpStatus.INTERNAL_SERVER_ERROR_500).json(Map.of(
                     "error", "failed to parse epub",
@@ -50,4 +36,5 @@ public class CountController {
             ));
         }
     }
+
 }

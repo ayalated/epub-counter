@@ -9,12 +9,14 @@
             max-width: 600px;
             margin: 40px auto;
         }
+
         #result {
             margin-top: 20px;
             white-space: pre-wrap;
             background: #f6f6f6;
             padding: 10px;
         }
+
         button {
             margin-top: 10px;
         }
@@ -24,7 +26,7 @@
 
 <h2>EPUB Counter</h2>
 
-<input type="file" id="fileInput" multiple accept=".epub">
+<input type="file" id="fileInput" accept=".epub">
 <br>
 <button onclick="upload()">upload</button>
 
@@ -36,37 +38,44 @@
         const resultDiv = document.getElementById("result");
 
         if (input.files.length === 0) {
-            resultDiv.textContent = "files could not be empty";
+            resultDiv.textContent = "file could not be empty";
             return;
         }
 
         const formData = new FormData();
-        for (const file of input.files) {
-            formData.append("file", file);
-        }
+        const file = input.files[0];
+        formData.append("file", file);
 
         resultDiv.textContent = "uploading...";
 
         try {
-            const resp = await fetch("http://localhost:13824", {
+            const resp = await fetch("http://localhost:8080/count", {
                 method: "POST",
                 body: formData
             });
 
-            const data = await resp.json();
+            if(!resp.ok){
+                if (resp.status === 413) {
+                    resultDiv.textContent = "file too large (max 10MB)";
+                    return;
+                }
 
-            if (!resp.ok) {
-                resultDiv.textContent = "error：\n" + JSON.stringify(data.error, null, 2);
+                // 其他错误，尽量安全读取 JSON
+                let msg = "request failed";
+
+                try {
+                    const data = await resp.json();
+                    if (data.error) msg = data.error;
+                } catch (_) {
+                }
+
+                resultDiv.textContent = msg;
                 return;
             }
 
-            let output = "";
-            for (const item of data.results) {
-                output += `${item.filename} : ${item.characters}\n`;
-            }
+            const data = await resp.json();
 
-            resultDiv.textContent = output;
-
+            resultDiv.textContent = `${data.filename} : ${data.characters}`;
         } catch (err) {
             resultDiv.textContent = "request failed:" + err;
         }
