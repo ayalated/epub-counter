@@ -49,7 +49,7 @@
         resultDiv.textContent = "uploading...";
 
         try {
-            const resp = await fetch("http://localhost:8080/count", {
+            const resp = await fetch("https://epubcounter.duckdns.org/count", {
                 method: "POST",
                 body: formData
             });
