@@ -1,37 +1,10 @@
-### 构建 
-    mvn clean package
+# EPUB Counter
 
-### 准备目录结构
+A simple web tool to count the number of characters in an EPUB file.
 
+Upload an EPUB file in your browser and get the total character count instantly.
 
-    C:\tools\epub-count
+## Online
 
-    epub-count.jar
-
-    epub-count.cmd
-
-
-### 创建启动脚本 `epub-count.cmd`
-
-    @echo off
-
-    java -jar "%~dp0epub-count.jar" %*
-
-### 将目录加入 PATH
-
-    Win + R
-
-    输入 sysdm.cpl
-
-    高级 → 环境变量
-
-    在「用户变量」中编辑 Path
-
-    新增：C:\tools\epub-count
-
-### 验证
-
-在任意目录打开新的 cmd：
-    
-    epub-count your-book.epub
-
+Frontend (GitHub Pages):  
+https://ayalated.github.io/epub-counter/
